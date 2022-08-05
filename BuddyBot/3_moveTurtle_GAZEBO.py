@@ -2,6 +2,7 @@
 import os, sys
 import select
 import rclpy
+import time
 import threading
 from rclpy.node import Node
 
@@ -30,13 +31,13 @@ class Bussub(Node):
         
         if msg.data == 'bus_arrive':
             turtlebot_go = 1   
-        elif msg.data == 'back':
-            turtlebot_go = 1 
         elif msg.data == 'turn':
             turtlebot_go = 2
-        elif msg.data == 'turn_2':
+        elif msg.data == 'back':
             turtlebot_go = 3  
         elif msg.data == 'stop':
+            turtlebot_go = 4
+        elif msg.data == 'move':
             turtlebot_go = 0
         
         qos = QoSProfile(depth=10)
@@ -51,15 +52,15 @@ class Bussub(Node):
             turtlebot_go = 0
         elif turtlebot_go == 2:
             control_linear_velocity = 0.0
-            control_angular_velocity = 1.0           
+            control_angular_velocity = 0.85           
             turtlebot_go= 0
         elif turtlebot_go == 3:
+            control_linear_velocity = 0.2
+            control_angular_velocity = 0.0
+            turtlebot_go = 0
+        elif turtlebot_go == 0:
             control_linear_velocity = 0.0
-            control_angular_velocity = 1.1           
-            turtlebot_go= 0
-        else:
-            control_linear_velocity = 0.0
-            control_angular_velocity = 0.0          
+            control_angular_velocity = 0.05   
             turtlebot_go = 0
         twist = Twist()
         
@@ -82,4 +83,4 @@ if __name__ == '__main__':
         bussub.get_logger().info('Keyboard Interrupt (SIGINT)')
     finally:
         bussub.destroy_node()
-        rclpy.shutdown()
+        rclpy.shutdown()  
