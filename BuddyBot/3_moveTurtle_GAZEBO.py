@@ -11,76 +11,113 @@ from geometry_msgs.msg import Twist, Vector3
 from rclpy.qos import QoSProfile
 from std_msgs.msg import String
 
-
 if os.name == 'nt':
     import msvcrt
 else:
     import termios
     import tty
 
-class Bussub(Node):
+class MoveTurtle(Node):
     def __init__(self):
-        super().__init__('bussub')
+        global pre_vel
+        super().__init__('Move_Turtle')
         qos_profile = QoSProfile(depth=10)
         self.bussub = self.create_subscription(String,'bus_come',self.move_to_turtle,qos_profile)
+        pre_vel = 0
             
     def move_to_turtle(self, msg):
-        global turtlebot_go
-        
+        global pre_vel
         self.get_logger().info('Received message: {0}'.format(msg.data))
-        
-        if msg.data == 'bus_arrive':
+        if msg.data == 'move':
             turtlebot_go = 1   
-        elif msg.data == 'turn':
+        elif msg.data == 'bus_recognition':
             turtlebot_go = 2
-        elif msg.data == 'back':
-            turtlebot_go = 3  
-        elif msg.data == 'stop':
-            turtlebot_go = 4
-        elif msg.data == 'move':
-            turtlebot_go = 0
-        
+            
         qos = QoSProfile(depth=10)
         self.pub = self.create_publisher(Twist, 'cmd_vel', qos)
+        twist = Twist()
         
         control_linear_velocity = 0.0
         control_angular_velocity = 0.0
-        
-        if turtlebot_go == 1:
-            control_linear_velocity = 0.2
-            control_angular_velocity = 0.0
-            turtlebot_go = 0
-        elif turtlebot_go == 2:
-            control_linear_velocity = 0.0
-            control_angular_velocity = 0.85           
-            turtlebot_go= 0
-        elif turtlebot_go == 3:
-            control_linear_velocity = 0.2
-            control_angular_velocity = 0.0
-            turtlebot_go = 0
-        elif turtlebot_go == 0:
-            control_linear_velocity = 0.0
-            control_angular_velocity = 0.05   
-            turtlebot_go = 0
-        twist = Twist()
-        
-        twist.linear.x = control_linear_velocity
         twist.linear.y = 0.0
         twist.linear.z = 0.0
         twist.angular.x = 0.0
         twist.angular.y = 0.0
-        twist.angular.z = control_angular_velocity
         
-        self.pub.publish(twist)
-
+        
+        if turtlebot_go == 1:
+            control_linear_velocity = 0.0
+            control_angular_velocity = 0.05    
+            twist.linear.x = control_linear_velocity
+            twist.angular.z = control_angular_velocity
+            self.pub.publish(twist)
+            pre_vel = 1
+        elif turtlebot_go == 2:
+            if pre_vel == 1:
+                #go
+                control_linear_velocity = 0.2
+                control_angular_velocity = 0.0
+                twist.linear.x = control_linear_velocity
+                twist.angular.z = control_angular_velocity
+                self.pub.publish(twist)
+                time.sleep(4)
+            
+                #stop
+                control_linear_velocity = 0.0
+                control_angular_velocity = 0.0
+                twist.linear.x = control_linear_velocity
+                twist.angular.z = control_angular_velocity
+                self.pub.publish(twist)
+                time.sleep(3)
+            
+                #turn
+                control_linear_velocity = 0.0
+                control_angular_velocity = 1.0
+                twist.linear.x = control_linear_velocity
+                twist.angular.z = control_angular_velocity
+                self.pub.publish(twist)
+                time.sleep(3)
+            
+                #back
+                control_linear_velocity = 0.2
+                control_angular_velocity = 0.0
+                twist.linear.x = control_linear_velocity
+                twist.angular.z = control_angular_velocity
+                self.pub.publish(twist)
+                time.sleep(4)
+            
+                #turn
+                control_linear_velocity = 0.0
+                control_angular_velocity = 1.1
+                twist.linear.x = control_linear_velocity
+                twist.angular.z = control_angular_velocity
+                self.pub.publish(twist)
+                time.sleep(3)
+            
+                #stop
+                control_linear_velocity = 0.0
+                control_angular_velocity = 0.0
+                twist.linear.x = control_linear_velocity
+                twist.angular.z = control_angular_velocity
+                self.pub.publish(twist)
+                turtle_go = 0
+                pre_vel = 2
+        else : #stop
+            control_linear_velocity = 0.0
+            control_angular_velocity = 0.0
+            twist.linear.x = control_linear_velocity
+            twist.angular.z = control_angular_velocity
+            self.pub.publish(twist)
+            pre_vel = 0
+        
 
 if __name__ == '__main__':
     rclpy.init(args=None)
-    bussub = Bussub()
+    moveTturtle = MoveTurtle()
     try:
-        rclpy.spin(bussub)
+        rclpy.spin(moveTturtle)
     except KeyboardInterrupt:
-        bussub.get_logger().info('Keyboard Interrupt (SIGINT)')
+        moveTturtle.get_logger().info('Keyboard Interrupt (SIGINT)')
     finally:
-        bussub.destroy_node()
-        rclpy.shutdown()  
+        moveTturtle.destroy_node()
+        rclpy.shutdown() 
