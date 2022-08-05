@@ -60,18 +60,31 @@ def main():
                 msg.data = 'bus_arrive'
                 pub.publish(msg)
                 print("bus arrive")
-                
                 time.sleep(4)
-                msg = String()
+                
+                msg.data = 'stop'
+                pub.publish(msg)
+                print("stop") 
+                time.sleep(3)
+            
                 msg.data = 'turn'
                 pub.publish(msg)
                 print("turn")   
+                time.sleep(3)
                 
-                time.sleep(4)
-                msg = String()
                 msg.data = 'back'
                 pub.publish(msg)
-                print("back")          
+                print("back") 
+                time.sleep(4)
+                
+                msg.data = 'turn_2'
+                pub.publish(msg)
+                print("turn")  
+                time.sleep(3)
+                
+                msg.data = 'stop'
+                pub.publish(msg)
+                print("stop")           
             else:
                 if (key == '\x03'):
                     break
