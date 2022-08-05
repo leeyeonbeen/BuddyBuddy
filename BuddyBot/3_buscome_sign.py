@@ -2,8 +2,9 @@ import os
 import select
 import sys
 import rclpy
+import time
 
-from std_msgs.msg import Header, String, Int32 
+from std_msgs.msg import Header, String, Int32
 from geometry_msgs.msg import Twist
 from rclpy.qos import QoSProfile
 
@@ -58,7 +59,19 @@ def main():
                 msg = String()
                 msg.data = 'bus_arrive'
                 pub.publish(msg)
-                print("bus arrive")            
+                print("bus arrive")
+                
+                time.sleep(4)
+                msg = String()
+                msg.data = 'turn'
+                pub.publish(msg)
+                print("turn")   
+                
+                time.sleep(4)
+                msg = String()
+                msg.data = 'back'
+                pub.publish(msg)
+                print("back")          
             else:
                 if (key == '\x03'):
                     break
@@ -72,4 +85,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main() 

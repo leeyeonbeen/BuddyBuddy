@@ -2,6 +2,7 @@
 import os, sys
 import select
 import rclpy
+import time
 import threading
 from rclpy.node import Node
 
@@ -29,6 +30,8 @@ e = """
 Communications Failed
 """
 turtlebot_go = 0
+turtlebot_turn = 0
+turtlebot_back = 0
 
 vel_msg = Twist()
 
@@ -40,8 +43,16 @@ class Bussub(Node):
             
     def subscribe_topic_message(self, msg):
         global turtlebot_go
+        global turtlebot_turn
+        global turtlebot_back
+        
         self.get_logger().info('Received message: {0}'.format(msg.data))
-        turtlebot_go = 1
+        if msg.data == 'bus_arrive':
+            turtlebot_go = 1
+        elif msg.data == 'turn':
+            turtlebot_turn = 1
+        elif msg.data == 'back':
+            turtlebot_back = 1   
 
 class MoveTurtle(Node):
 
@@ -49,7 +60,8 @@ class MoveTurtle(Node):
         super().__init__('moveTurtle')
         qos = QoSProfile(depth=10)
         self.pub = self.create_publisher(Twist, 'cmd_vel', qos)
-        self.timer = self.create_timer(1, self.timer_callback)
+        self.timer = self.create_timer(4, self.timer_callback)
+       
          
         status = 0
         target_linear_velocity = 0.0
@@ -60,13 +72,30 @@ class MoveTurtle(Node):
         
     def timer_callback(self):
         global turtlebot_go
+        global turtlebot_turn
+        global turtlebot_back
+        
         if turtlebot_go == 1:
-            target_linear_velocity = 0.22
+            target_linear_velocity = 0.2
             target_angular_velocity = 0.0
-            control_linear_velocity = 0.22
+            control_linear_velocity = 0.2
             control_angular_velocity = 0.0
             #self.print_vels(target_linear_velocity, target_angular_velocity)
             turtlebot_go = 0
+        elif turtlebot_turn == 1:
+            target_linear_velocity = 0.0
+            target_angular_velocity = 0.7
+            control_linear_velocity = 0.0
+            control_angular_velocity = 0.7
+            #self.print_vels(target_linear_velocity, target_angular_velocity)
+            turtlebot_turn = 0
+        elif turtlebot_back == 1:
+            target_linear_velocity = 0.2
+            target_angular_velocity = 0.0
+            control_linear_velocity = 0.2
+            control_angular_velocity = 0.0
+            #self.print_vels(target_linear_velocity, target_angular_velocity)
+            turtlebot_back = 0
         else:
             target_linear_velocity = 0.0
             target_angular_velocity = 0.0
@@ -74,6 +103,8 @@ class MoveTurtle(Node):
             control_angular_velocity = 0.0
             #self.print_vels(target_linear_velocity, target_angular_velocity)
             turtlebot_go = 0
+            turtlebot_turn = 0
+            turtlebot_back = 0
         twist = Twist()
 
         #control_linear_velocity = self.make_simple_profile(control_linear_velocity,target_linear_velocity,(LIN_VEL_STEP_SIZE / 2.0))
@@ -153,4 +184,4 @@ if __name__ == '__main__':
         pass
     
     rclpy.shutdown()
-    executor_thread.join()
+    executor_thread.join() 
