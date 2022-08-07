@@ -42,8 +42,8 @@ try :
       distance = round(distance, 2)
 
       msg = Int32()
-      pub.publish(msg)
       msg.data = distance
+      pub.publish(msg)
       print("Distance : ", distance, "cm")
 except :
     gpio.cleanup()
