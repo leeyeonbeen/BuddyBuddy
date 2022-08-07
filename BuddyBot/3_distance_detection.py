@@ -16,6 +16,12 @@ print("start")
 gpio.setup(trig, gpio.OUT)
 gpio.setup(echo, gpio.IN)
 
+rclpy.init()
+    
+qos = QoSProfile(depth=10)
+node = rclpy.create_node('distance_detection')
+pub = node.create_publisher(Int32, 'closer', qos)
+
 try :
     while True :
       gpio.output(trig, False)
@@ -34,14 +40,6 @@ try :
       pulse_duration = pulse_end - pulse_start
       distance = pulse_duration * 17000
       distance = round(distance, 2)
-
-      #Distance.data = distance
-
-      rclpy.init()
-    
-      qos = QoSProfile(depth=10)
-      node = rclpy.create_node('distance_detection')
-      pub = node.create_publisher(Int32, 'closer', qos)
 
       msg = Int32()
       pub.publish(msg)

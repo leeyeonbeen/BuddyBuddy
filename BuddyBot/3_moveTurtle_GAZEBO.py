@@ -49,7 +49,7 @@ class MoveTurtle(Node):
         twist.angular.x = 0.0
         twist.angular.y = 0.0
 
-        if msg.data > 5:
+        if msg.data < 5:
             stop = 1
         else:
             stop = 0
