@@ -7,7 +7,7 @@ from rclpy.qos import QoSProfile
 from std_msgs.msg import Header, String, Int32
 
 
-class Bussub(Node):
+class Distance(Node):
     def __init__(self):
         global dis
         super().__init__('distance_detection')
@@ -35,11 +35,11 @@ class Bussub(Node):
 
 if __name__ == '__main__':
     rclpy.init(args=None)
-    bussub = Bussub()
+    distance = Distance()
     try:
-        rclpy.spin(bussub)
+        rclpy.spin(distance)
     except KeyboardInterrupt:
-        bussub.get_logger().info('Keyboard Interrupt (SIGINT)')
+        distance.get_logger().info('Keyboard Interrupt (SIGINT)')
     finally:
-        bussub.destroy_node()
+        distance.destroy_node()
         rclpy.shutdown()
